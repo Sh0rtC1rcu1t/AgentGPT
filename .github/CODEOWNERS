@@ -1,0 +1,8 @@
+# CODEOWNERS
+
+# Require review from repo owner for core directories
+* @Sh0rtC1rcu1t
+
+/backend/ @Sh0rtC1rcu1t
+/native-apps/ @Sh0rtC1rcu1t
+/.github/ @Sh0rtC1rcu1t
