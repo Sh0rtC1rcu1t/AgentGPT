@@ -1,0 +1,58 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>AgentGPT MCP PoC</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Roboto, sans-serif; padding: 24px }
+      textarea { width: 100%; height: 120px }
+    </style>
+  </head>
+  <body>
+    <h1>AgentGPT MCP PoC</h1>
+    <div>
+      <label>Provider: <select id="provider"></select></label>
+    </div>
+    <div>
+      <label>Model: <input id="model" value="gpt2"/></label>
+    </div>
+    <div>
+      <textarea id="prompt">Write a short friendly greeting and describe the model provider used.</textarea>
+    </div>
+    <div>
+      <button id="run">Run</button>
+    </div>
+    <pre id="out"></pre>
+
+    <script>
+      async function init() {
+        const p = await fetch('/providers').then(r=>r.json());
+        const sel = document.getElementById('provider');
+        p.providers.forEach(x => { const o=document.createElement('option'); o.value=x; o.textContent=x; sel.appendChild(o); });
+        sel.value = p.selected;
+      }
+      document.getElementById('run').addEventListener('click', async ()=>{
+        const provider = document.getElementById('provider').value;
+        const model = document.getElementById('model').value;
+        const prompt = document.getElementById('prompt').value;
+        const out = document.getElementById('out');
+        out.textContent = 'Running...';
+        try {
+          const res = await fetch('/run', { method:'POST', headers:{'content-type':'application/json'}, body: JSON.stringify({ provider, model, prompt }) });
+          const j = await res.json();
+          out.textContent = JSON.stringify(j, null, 2);
+        } catch (err) { out.textContent = String(err); }
+      });
+      // proxy for calls: assume backend is same host/port in docker-compose via reverse proxy; in dev use http://localhost:4000
+      if (location.origin.indexOf('3000') !== -1) {
+        // simple proxy using fetch to http://localhost:4000
+        window.fetch = (orig => (input, init) => {
+          const url = typeof input === 'string' ? input : input.url;
+          if (url.startsWith('/')) return orig('http://localhost:4000' + url, init);
+          return orig(input, init);
+        })(window.fetch.bind(window));
+      }
+      init();
+    </script>
+  </body>
+</html>

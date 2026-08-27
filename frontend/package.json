@@ -1,0 +1,8 @@
+{
+  "name": "agentgpt-frontend-poc",
+  "version": "0.1.0",
+  "license": "MIT",
+  "dependencies": {
+    "http-server": "^14.1.1"
+  }
+}
